@@ -58,6 +58,14 @@
   revision = "c20e083e31230b84ffa23c5d2fb0bc55f5292681"
 
 [[projects]]
+  digest = "1:edbef42561faa44c19129b68d1e109fbc1647f63239250391eadc8d0e7c9f669"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:463e4140189f8194f9121ca1c7fe3b8e9e9a2ab3d949b43c835c21034927dc62"
   name = "github.com/miekg/dns"
   packages = ["."]
@@ -120,6 +128,7 @@
     "github.com/brutella/hc/accessory",
     "github.com/brutella/hc/characteristic",
     "github.com/brutella/hc/service",
+    "github.com/kelseyhightower/envconfig",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
