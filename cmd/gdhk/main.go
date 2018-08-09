@@ -14,6 +14,8 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+var version = "develop"
+
 // Config is used as a value store for envconfig
 // (configuration via environment variables)
 type Config struct {
@@ -49,7 +51,13 @@ func main() {
 	flag.StringVar(&conf.Password, "p", conf.Password, "`password` for requests to garage door API")
 	flag.UintVar(&conf.Limit, "limit", conf.Limit, "Limit probing the API to once every `n` seconds")
 	e := flag.Bool("e", false, "show envconfig help and exit")
+	v := flag.Bool("version", false, "show version and exit")
 	flag.Parse()
+
+	if *v {
+		fmt.Printf("%s: %s", os.Args[0], version)
+		os.Exit(0)
+	}
 
 	if *e {
 		envconfig.Usage("gd", &Config{})

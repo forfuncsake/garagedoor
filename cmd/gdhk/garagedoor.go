@@ -23,7 +23,7 @@ var stateURL = map[int]string{
 	press: "/press",
 }
 
-type APIResponse struct {
+type apiResponse struct {
 	Success bool   `json:"success"`
 	Status  int    `json:"status"`
 	Message string `json:"message"`
@@ -148,7 +148,7 @@ func (d *GarageDoor) getState() (state int) {
 		return state
 	}
 
-	var msg APIResponse
+	var msg apiResponse
 	err = json.Unmarshal(b, &msg)
 	if err != nil {
 		log.Printf("error marshalling status response: %v\n", err)

@@ -69,7 +69,7 @@ func newAPI() (*api, error) {
 }
 
 func (a *api) respond(w http.ResponseWriter, r *http.Request) {
-	resp := APIResponse{Success: true}
+	resp := apiResponse{Success: true}
 
 	if strings.HasPrefix(r.URL.Path, "/open") {
 		a.status = open
