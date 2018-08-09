@@ -23,6 +23,12 @@ var stateURL = map[int]string{
 	press: "/press",
 }
 
+type APIResponse struct {
+	Success bool   `json:"success"`
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
 // GarageDoor represents a HomeKit Accessory with a GarageDoorOpener
 // and a Switch. The Opener will intelligently request a target state
 // for the door (opened/closed), where the switch will always
@@ -36,8 +42,9 @@ type GarageDoor struct {
 	Opener *service.GarageDoorOpener
 	Button *service.Switch
 
-	state int
-	guard chan struct{}
+	state      int
+	guard      chan struct{}
+	guardDelay time.Duration
 }
 
 // NewGarageDoor returns a GarageDoor with the provided accessory info.
@@ -49,8 +56,17 @@ func NewGarageDoor(conf Config, info accessory.Info) *GarageDoor {
 		Accessory: accessory.New(info, accessory.TypeGarageDoorOpener),
 		Button:    service.NewSwitch(),
 		Opener:    service.NewGarageDoorOpener(),
-		guard:     make(chan struct{}, 1),
 	}
+
+	// Apply rate limiter, if configured
+	if conf.Limit > 0 {
+		acc.guardDelay = time.Duration(conf.Limit) * time.Second
+		acc.guard = make(chan struct{}, 1)
+
+		// Load a token into the guard channel
+		acc.guard <- struct{}{}
+	}
+
 	acc.AddService(acc.Opener.Service)
 	acc.AddService(acc.Button.Service)
 
@@ -59,9 +75,6 @@ func NewGarageDoor(conf Config, info accessory.Info) *GarageDoor {
 	acc.Opener.TargetDoorState.OnValueRemoteUpdate(acc.setState)
 	acc.Opener.CurrentDoorState.SetEventsEnabled(true)
 	acc.Button.On.OnValueRemoteUpdate(acc.pressButton)
-
-	// Load a token into the guard channel
-	acc.guard <- struct{}{}
 
 	return &acc
 }
@@ -108,17 +121,19 @@ func (d *GarageDoor) getState() (state int) {
 	}()
 	state = -1
 
-	// Guard the module from being probed more than once a second
+	// Guard the module from being probed more than the configured limit
 	// by returning the last saved state
-	select {
-	case <-d.guard:
-		go func() {
-			<-time.After(1 * time.Second)
-			d.guard <- struct{}{}
-		}()
-	default:
-		log.Println("Guarding probe from excessive polls")
-		return d.state
+	if d.guard != nil {
+		select {
+		case <-d.guard:
+			go func() {
+				<-time.After(d.guardDelay)
+				d.guard <- struct{}{}
+			}()
+		default:
+			log.Println("Guarding probe from excessive polls")
+			return d.state
+		}
 	}
 
 	resp, err := http.Get(d.URL)
@@ -133,25 +148,21 @@ func (d *GarageDoor) getState() (state int) {
 		return state
 	}
 
-	var a struct {
-		Success bool   `json:"success"`
-		Status  int    `json:"status"`
-		Message string `json:"message"`
-	}
-	err = json.Unmarshal(b, &a)
+	var msg APIResponse
+	err = json.Unmarshal(b, &msg)
 	if err != nil {
 		log.Printf("error marshalling status response: %v\n", err)
 		return state
 	}
 
-	if !a.Success {
-		log.Printf("got error from API: %s\n", a.Message)
-		if a.Status < 1 {
+	if !msg.Success {
+		log.Printf("got error from API: %s\n", msg.Message)
+		if msg.Status < 1 {
 			return state
 		}
 	}
 
-	state = a.Status
+	state = msg.Status
 	return state
 }
 
