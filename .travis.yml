@@ -1,5 +1,7 @@
 language: go
-sudo: false
+sudo: required
+services:
+  - docker
 matrix:
   include:
     - go: 1.x
@@ -9,6 +11,11 @@ matrix:
     - go: tip
   allow_failures:
     - go: tip
+
+env:
+  global:
+    - DOCKER_USERNAME=forfuncsake
+    - secure: CxK5bxLyIBMwmyOK0NXMpTGJktOP9yKF7Tu/dQLkXYSIvc3c+EtGsHumQQ95KUQmstPtpdpCfKPp3n56xcFHH8rr2w0G93Lld4iBEQqDXPmfpBnTlCtG2lebRp1PhQP5JgA/bMcF+ktOUhixWHbIi7Dije9w1xh0YDO2zESWoslNaq92b4LIIub2Aj3NWseLOA6WmCBsQOEFmlNcn9QS5ZWdqFezM0UQ+H452eTclVhUGJce6tE7dN6lfmPiCz1O2Rsw++YJl+3/Zay1EuS8x/r3YIOnMQ+/pqTQzPpM/WaD/USbA4Jz/bAT0fYqrbHHmVFiVwwDoB7t/A8uscpetxMPixFxCnF6Buq9FhP7LZC07tQuoow/taClJxI5xmNbA9LJhbutpuwWWbz7+YlLmDcipKKhIpLbFSn+ZjVpSIkkGZbGd4+nrRxykYHhpPjX69EsMBH8ZxK1PGbOdS3WzMaFPZ/RIe/JBYsYbt2eV8up1XG2bT9hLRhA/Ms6KusqQeoKsjNAnwM6WPmvwRIM8mLW224hizVl7vV+olbtEgWHBRp5l2oInRVuSdt4Ak5uFFOw+UWF6kUxlbREBO6z3CtnF6gylgEx1p3Z6p7iWJG97RZFLbi/jQaxg8HgmmeH4lbxgY8f9I9cpHsCJSus7ligURylZgp50sgVnkYpaPg=
 
 before_install:
   - go get github.com/mitchellh/gox
@@ -22,18 +29,26 @@ script:
   - go vet $(go list ./... | grep -v vendor/)
   - go test -v -race -cover ./...
   # Only build binaries from the latest Go release.
-  - if [ "${LATEST}" = "true" ]; then gox -os="linux darwin windows" -arch="amd64" -output="gdhk.{{.OS}}.{{.Arch}}" -ldflags "-X main.version=`git rev-parse --short HEAD`" -verbose ./...; fi
+  - if [ "${LATEST}" = "true" ]; then CGO_ENABLED=0 gox -os="linux darwin windows" -arch="amd64" -output="gdhk.{{.OS}}.{{.Arch}}" -rebuild -tags netgo -ldflags "-w -X main.version=`git rev-parse --short HEAD`" -verbose ./...; fi
 
 deploy:
-  provider: releases
-  skip_cleanup: true
-  api_key:
-    secure: "sItO+tJTzvgeSC/UFAfHSXhUoTqe7U3b5+4eohwrY9SrCqEdizsmQ3CdhRqJFoaXtAvapug1WwgcFaDciXcPwcczyFRuK8ED31jmDpgDEp7H+xrf4LArhBjrwqLt3+v4MYQMYfpSBKk7qV+17HD9CeqNCbkbwGwq/RXXDE9WqZ+ki6MshQk8gyg+6EBExSOnUbRLsOL69gXKrDNFT9RZZKpiHTwWQ3HE17TGRgOe8YV3QvL7PMkClr6UZ0yjrtyx90hx+aLBFBujO+Z6+A4Wq37OAkmi/HZ8M0gxxu56LwVYbwlmY9JC40+ZWRL1+z6l8HOO7o6okpwvdgqHHFSXkNi5QHEVkGMSLVI4tSZ+TyAll5q541cOI/1fTYaRCxDX9PuVi/LxLoeIss1G+8mw2d94sq59cWNPdxC5wRqofECjGRBKtTYHWt88oNoRKiduAr9TYborl8B30ZGCcqVK2eaV342E4ORHBfp9YSxtiUI8ytet1Sd5RVlenl7RiCPk6dsXHjBplC5bEBiOJzYx0uLijc/DQG9cANyJE3CJVxJxYHn7l5CKWoj4dYpvl5NepL3rTW38llVHhdMWLUPU3fFnk036eaC9kKR0SisDJfpeufTUUXHtgjrgYFThigiVw3TpfkwlfAzL/IV4fEJ/sw2xO5KJgLRF6KkmDKSiGrw="
-  file:
-  - gdhk.windows.amd64.exe
-  - gdhk.darwin.amd64
-  - gdhk.linux.amd64
-  on:
-    repo: forfuncsake/garagedoor
-    tags: true
-    condition: $LATEST = true
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: "sItO+tJTzvgeSC/UFAfHSXhUoTqe7U3b5+4eohwrY9SrCqEdizsmQ3CdhRqJFoaXtAvapug1WwgcFaDciXcPwcczyFRuK8ED31jmDpgDEp7H+xrf4LArhBjrwqLt3+v4MYQMYfpSBKk7qV+17HD9CeqNCbkbwGwq/RXXDE9WqZ+ki6MshQk8gyg+6EBExSOnUbRLsOL69gXKrDNFT9RZZKpiHTwWQ3HE17TGRgOe8YV3QvL7PMkClr6UZ0yjrtyx90hx+aLBFBujO+Z6+A4Wq37OAkmi/HZ8M0gxxu56LwVYbwlmY9JC40+ZWRL1+z6l8HOO7o6okpwvdgqHHFSXkNi5QHEVkGMSLVI4tSZ+TyAll5q541cOI/1fTYaRCxDX9PuVi/LxLoeIss1G+8mw2d94sq59cWNPdxC5wRqofECjGRBKtTYHWt88oNoRKiduAr9TYborl8B30ZGCcqVK2eaV342E4ORHBfp9YSxtiUI8ytet1Sd5RVlenl7RiCPk6dsXHjBplC5bEBiOJzYx0uLijc/DQG9cANyJE3CJVxJxYHn7l5CKWoj4dYpvl5NepL3rTW38llVHhdMWLUPU3fFnk036eaC9kKR0SisDJfpeufTUUXHtgjrgYFThigiVw3TpfkwlfAzL/IV4fEJ/sw2xO5KJgLRF6KkmDKSiGrw="
+    file:
+    - gdhk.windows.amd64.exe
+    - gdhk.darwin.amd64
+    - gdhk.linux.amd64
+    on:
+      repo: forfuncsake/garagedoor
+      tags: true
+      condition: $LATEST = true
+  - provider: script
+    skip_cleanup: true
+    script: bash docker_push.sh
+    on:
+      repo: forfuncsake/garagedoor
+      tags: true
+      condition: $LATEST = true
+
