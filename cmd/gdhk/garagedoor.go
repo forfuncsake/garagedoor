@@ -34,6 +34,7 @@ type apiResponse struct {
 // for the door (opened/closed), where the switch will always
 // trigger the door button.
 type GarageDoor struct {
+	Name     string
 	URL      string
 	User     string
 	Password string
@@ -47,9 +48,17 @@ type GarageDoor struct {
 	guardDelay time.Duration
 }
 
-// NewGarageDoor returns a GarageDoor with the provided accessory info.
-func NewGarageDoor(conf Config, info accessory.Info) *GarageDoor {
+// NewGarageDoor returns a GarageDoor with the provided config.
+func NewGarageDoor(conf Config) *GarageDoor {
+	info := accessory.Info{
+		Name:         conf.Name,
+		SerialNumber: conf.Serial,
+		Manufacturer: "forfuncsake",
+		Model:        "GDHK",
+	}
+
 	acc := GarageDoor{
+		Name:      conf.Name,
 		URL:       conf.URL,
 		User:      conf.Username,
 		Password:  conf.Password,

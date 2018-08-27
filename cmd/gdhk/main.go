@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/brutella/hc"
-	"github.com/brutella/hc/accessory"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -30,6 +30,8 @@ type Config struct {
 	Username    string `default:"admin"`
 	Password    string `default:"password"`
 	Limit       uint
+
+	Wemo bool
 }
 
 func main() {
@@ -50,12 +52,13 @@ func main() {
 	flag.StringVar(&conf.Username, "u", conf.Username, "`username` for requests to garage door API")
 	flag.StringVar(&conf.Password, "p", conf.Password, "`password` for requests to garage door API")
 	flag.UintVar(&conf.Limit, "limit", conf.Limit, "Limit probing the API to once every `n` seconds")
+	flag.BoolVar(&conf.Wemo, "wemo", conf.Wemo, "Also enable control as a simulated wemo plug")
 	e := flag.Bool("e", false, "show envconfig help and exit")
 	v := flag.Bool("version", false, "show version and exit")
 	flag.Parse()
 
 	if *v {
-		fmt.Printf("%s: %s", os.Args[0], version)
+		fmt.Printf("%s: %s\n", os.Args[0], version)
 		os.Exit(0)
 	}
 
@@ -86,13 +89,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	info := accessory.Info{
-		Name:         conf.Name,
-		SerialNumber: conf.Serial,
-		Manufacturer: "forfuncsake",
-		Model:        "GDHK",
-	}
-	door := NewGarageDoor(conf, info)
+	door := NewGarageDoor(conf)
 
 	config := hc.Config{
 		Pin:         conf.PIN,
@@ -115,6 +112,13 @@ func main() {
 		door.Opener.CurrentDoorState.SetValue(door.state)
 		door.Opener.TargetDoorState.SetValue(door.getTargetState())
 	})
+
+	if conf.Wemo {
+		err = door.enableWemo()
+		if err != nil {
+			log.Printf("warning: could not start wemo emulation: %v", err)
+		}
+	}
 
 	timeout := 5 * time.Second
 	srv := http.Server{

@@ -51,6 +51,30 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:abba8cb01d6014307c206230ebeb3a371012d0a5b52fa6d4bd67df7cd840bfa4"
+  name = "github.com/forfuncsake/minissdpc"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e8e011216ae6d98aa0f82e76d84e6e55b133a881"
+
+[[projects]]
+  branch = "master"
+  digest = "1:75da25bfac9775d30526da2d54dc45b514e263e2b183d98a363430720b817375"
+  name = "github.com/forfuncsake/smartswitch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d6e8b665700f5e7e2a188f04fa5223aef54ba510"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e6767b4a23d757750a6954f01ab9499bc8a638324c31d2aebb04db3bee5df801"
+  name = "github.com/fromkeith/gossdp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1b2c43f6886e14496400ab0448e2eea9d8bc5b82"
+
+[[projects]]
+  branch = "master"
   digest = "1:cf2c701ef0396364e4b9964e68810ea873142eed2f7356744dacc2ed75edf0af"
   name = "github.com/gosexy/to"
   packages = ["."]
@@ -74,6 +98,14 @@
   version = "v1.0.8"
 
 [[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   branch = "master"
   digest = "1:4203ff9f9475785fe17a29ce1f4e72098d770606a14b6559e8ddc3bd3f579f5e"
   name = "github.com/tadglines/go-pkgs"
@@ -83,7 +115,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ca647d374cd488260d49d4995ee5813851fc44142f6255dcff52eaf698e11b0e"
+  digest = "1:35d71dddeba667341739220cd55ce8e4ecd4595f42b4c0823a5c101b7d989ecc"
   name = "golang.org/x/crypto"
   packages = [
     "chacha20poly1305",
@@ -96,7 +128,7 @@
     "poly1305",
   ]
   pruneopts = "UT"
-  revision = "f027049dab0ad238e394a753dba2d14753473a04"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
@@ -110,7 +142,7 @@
     "ipv6",
   ]
   pruneopts = "UT"
-  revision = "f9ce57c11b242f0f1599cf25c89d8cb02c45295a"
+  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
 
 [[projects]]
   branch = "master"
@@ -118,7 +150,7 @@
   name = "golang.org/x/sys"
   packages = ["cpu"]
   pruneopts = "UT"
-  revision = "acbc56fc7007d2a01796d5bde54f39e3b3e95945"
+  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -128,6 +160,7 @@
     "github.com/brutella/hc/accessory",
     "github.com/brutella/hc/characteristic",
     "github.com/brutella/hc/service",
+    "github.com/forfuncsake/smartswitch",
     "github.com/kelseyhightower/envconfig",
   ]
   solver-name = "gps-cdcl"

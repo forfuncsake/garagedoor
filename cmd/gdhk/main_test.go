@@ -4,22 +4,19 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kelseyhightower/envconfig"
-
-	"github.com/brutella/hc/accessory"
 	"github.com/brutella/hc/characteristic"
+	"github.com/kelseyhightower/envconfig"
 )
 
 func newDoor(port int) *GarageDoor {
 	conf := Config{}
 	envconfig.Process("gd_test", &conf)
+
+	conf.Name = "GarageDoorTest"
+	conf.Serial = "1234567890"
 	conf.URL = fmt.Sprintf("http://127.0.0.1:%d", port)
-	door := NewGarageDoor(conf, accessory.Info{
-		Name:         "GarageDoorTest",
-		SerialNumber: "1234567890",
-		Manufacturer: "forfuncsake",
-		Model:        "GDHK",
-	})
+
+	door := NewGarageDoor(conf)
 
 	return door
 }
